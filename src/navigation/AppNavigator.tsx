@@ -8,7 +8,9 @@ import HomeScreen from "../screens/Home";
 import PayScreen from "../screens/PayScreen";
 import AdditionalInformationScreen from "../screens/AdditionalInformationScreen";
 import QRCodeScanner from "../screens/QRCodeScanner";
-
+import PhoneNumberPayScreen from "../screens/PhoneNumberPaymentScreen";
+import UnderDevelopmentScreen from "../screens/UnderDevelopmentScreen";
+import SplashScreen from "../screens/SplashScreen";
 // Define the stack navigator
 const Stack = createNativeStackNavigator();
 
@@ -25,7 +27,12 @@ export type RootStackParamList = {
 const AppNavigator = () => {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="LandingPage">
+      <Stack.Navigator initialRouteName="SplashScreen">
+      <Stack.Screen
+          name="SplashScreen"
+          component={SplashScreen}
+          options={{ headerShown: false }}
+        />
         <Stack.Screen
           name="LandingPage"
           component={SmartAuthScreen}
@@ -54,8 +61,30 @@ const AppNavigator = () => {
         <Stack.Screen
           name="AdditionalInfomrationFoam"
           component={AdditionalInformationScreen}
+          options={{ headerShown: false }}
         />
-        <Stack.Screen name="QRCodeScanner" component={QRCodeScanner} />
+        <Stack.Screen
+          name="QRCodeScanner"
+          component={QRCodeScanner}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="PhoneNumberPayScreen"
+          component={PhoneNumberPayScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="UnderDevelopmentScreen"
+          component={UnderDevelopmentScreen}
+          options={{ headerShown: false }}
+        />
+
+        {/* Fallback screen for any undefined routes */}
+        <Stack.Screen
+          name="NotFound"
+          component={HomeScreen}
+          options={{ headerShown: false }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

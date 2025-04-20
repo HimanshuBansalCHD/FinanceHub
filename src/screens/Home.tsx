@@ -23,7 +23,7 @@ export default function HomeScreen({ navigation }: any) {
       {/* Top Banner (15% of screen height) */}
       <View style={styles.bannerContainer}>
         <Image
-          source={require("../../images/Background.jpeg")}// Replace with your image
+          source={require("../../images/FinHubBg3.png")}// Replace with your image
           style={styles.bannerImage}
           resizeMode="cover"
         />
@@ -40,10 +40,25 @@ export default function HomeScreen({ navigation }: any) {
 
         <TouchableOpacity
           style={styles.tile}
-          onPress={() => navigation.navigate('PhoneNumberPay')}
+          onPress={() => navigation.navigate('PhoneNumberPayScreen')}
         >
           <Text style={styles.tileText}>Pay via Phone Number</Text>
         </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.tile}
+          onPress={() => navigation.navigate('UnderDevelopmentScreen')}
+        >
+          <Text style={styles.tileText}>Split Hub</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.tile}
+          onPress={() => navigation.navigate('UnderDevelopmentScreen')}
+        >
+          <Text style={styles.tileText}>Analytics Hub</Text>
+        </TouchableOpacity>
+
       </View>
     </DismissKeyboardView>
   );
@@ -60,7 +75,7 @@ const styles = StyleSheet.create({
   },
   bannerImage: {
     width: '100%',
-    height: '100%',
+    height: '130%',
   },
   tilesContainer: {
     flex: 1,
@@ -72,7 +87,7 @@ const styles = StyleSheet.create({
     gap: 20,
   },
   tile: {
-    backgroundColor: '#e9f0ff',
+    backgroundColor: '#E6E6FA',
     borderRadius: 20,
     width: '45%',
     height: 190,
@@ -86,7 +101,7 @@ const styles = StyleSheet.create({
   tileText: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#1a73e8',
+    color: '#5F259F',
     textAlign: 'center',
   },
 });
