@@ -28,8 +28,12 @@ export async function getUserIdFromEmail(emailId: string): Promise<string> {
 
 async function checkUserIdOnFirestore(userId: string): Promise<boolean> {
   const userDoc = await getDoc(doc(db, USER_COLLECTION_NAME, userId));
-  return userDoc.exists();
+  if (userDoc.exists()) {
+    return userDoc.data()?.isVerified ?? false;
+  }
+  return false;
 }
+
 export async function isExistingUser(
   userId: string | null = null,
   emailId: string | null = null

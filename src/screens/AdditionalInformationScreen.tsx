@@ -8,17 +8,25 @@ import {
   TouchableOpacity,
   Modal,
   FlatList,
+  Animated,
+  Dimensions,
+  KeyboardAvoidingView,
+  Platform,
+  TouchableWithoutFeedback,
+  Keyboard,
+  Image,
 } from "react-native";
-import DismissKeyboardView from "../components/DismissKeyboardView";
 import { setDocument } from "../utils/FirebaseUtil";
 import { USER_COLLECTION_NAME } from "../utils/Constants";
 import { getUserIdFromEmail } from "../utils/common";
+
+const screenHeight = Dimensions.get("window").height;
 
 export default function AdditionalInformationScreen({
   navigation,
   route,
 }: any) {
-  const { email } = route.params || {}; // Get user from params
+  const { email } = route.params || {};
   const [name, setName] = useState("");
   const [age, setAge] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -28,10 +36,31 @@ export default function AdditionalInformationScreen({
   const [nameError, setNameError] = useState(false);
   const [ageError, setAgeError] = useState(false);
   const [phoneError, setPhoneError] = useState(false);
+  const [imageAnimation] = useState(new Animated.Value(0));
+
+  const genderData = [
+    { label: "Male", value: "male" },
+    { label: "Female", value: "female" },
+  ];
+
+  const handleFocus = () => {
+    Animated.timing(imageAnimation, {
+      toValue: 1,
+      duration: 500,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handleBlur = () => {
+    Animated.timing(imageAnimation, {
+      toValue: 0,
+      duration: 500,
+      useNativeDriver: true,
+    }).start();
+  };
 
   const handleSaveInformation = async () => {
     const userId = await getUserIdFromEmail(email);
-    // Reset all error states first
     setNameError(false);
     setPhoneError(false);
     setAgeError(false);
@@ -60,165 +89,220 @@ export default function AdditionalInformationScreen({
       await setDocument(
         USER_COLLECTION_NAME,
         {
-          name,
-          age,
-          gender,
-          phoneNumber,
+          name: name,
+          age: age,
+          gender: gender,
+          phoneNumber: phoneNumber,
+          isVerified: true,
         },
         userId
       );
 
-      Alert.alert("Information saved successfully.");
       navigation.navigate("Home");
     } catch (err: any) {
       setError(err.message);
     }
   };
 
-  // Gender data for the dropdown
-  const genderData = [
-    { label: "Male", value: "male", color: "blue" },
-    { label: "Female", value: "female", color: "#D5006D" },
-  ];
+  const imageStyle = {
+    transform: [
+      {
+        scale: imageAnimation.interpolate({
+          inputRange: [0, 1],
+          outputRange: [1, 1.1],
+        }),
+      },
+    ],
+    opacity: imageAnimation.interpolate({
+      inputRange: [0, 1],
+      outputRange: [1, 0.8],
+    }),
+    zIndex: -1,
+  };
 
   return (
-    <DismissKeyboardView style={styles.container}>
-      <Text style={styles.title}>Enter Your Details</Text>
-
-      <TextInput
-        placeholder="Name"
-        value={name}
-        onChangeText={setName}
-        style={[styles.input, nameError && styles.inputError]}
-      />
-
-      <TextInput
-        placeholder="Age"
-        value={age}
-        onChangeText={setAge}
-        style={[styles.input, ageError && styles.inputError]}
-        keyboardType="numeric"
-      />
-
-      <TextInput
-        placeholder="Phone Number"
-        value={phoneNumber}
-        onChangeText={setPhoneNumber}
-        style={[styles.input, phoneError && styles.inputError]}
-        keyboardType="phone-pad"
-      />
-
-      {/* Gender Text with TouchableOpacity */}
-      <Text style={styles.label}>Gender</Text>
-      <TouchableOpacity
-        style={styles.pickerTouchable}
-        onPress={() => setModalVisible(true)}
-      >
-        <Text
-          style={[
-            { color: gender === "male" ? "blue" : "#D5006D" }, // Style color based on gender selection
-            styles.pickerText,
-          ]}
-        >
-          {gender === "male" ? "Male" : "Female"}{" "}
-          {/* Display selected gender */}
-        </Text>
-      </TouchableOpacity>
-
-      {/* Modal for Gender Dropdown */}
-      <Modal
-        transparent={true}
-        visible={modalVisible}
-        animationType="fade"
-        onRequestClose={() => setModalVisible(false)} // Close modal on request
-      >
-        <TouchableOpacity
-          style={styles.modalOverlay}
-          activeOpacity={1}
-          onPressOut={() => setModalVisible(false)} // Close modal if clicked outside
-        >
-          <View style={styles.modalContainer}>
-            <FlatList
-              data={genderData}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={[
-                    styles.modalItem,
-                    {
-                      backgroundColor:
-                        gender === item.value ? "#e0e0e0" : "white",
-                    },
-                  ]}
-                  onPress={() => {
-                    setGender(item.value); // Set selected gender
-                    setModalVisible(false); // Close modal after selection
-                  }}
-                >
-                  <Text style={[styles.modalItemText, { color: item.color }]}>
-                    {item.label}
-                  </Text>
-                </TouchableOpacity>
-              )}
-              keyExtractor={(item) => item.value}
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={{ flex: 1 }}>
+          <View style={styles.bannerContainer}>
+            <Animated.Image
+              source={require("../../images/RegisterScreen.png")}
+              style={[styles.bannerImage, imageStyle]}
+              resizeMode="cover"
             />
           </View>
-        </TouchableOpacity>
-      </Modal>
 
-      {/* Error message */}
-      {error && <Text style={styles.error}>{error}</Text>}
+          <View style={styles.formContainer}>
+            <Text style={styles.title}>Enter Your Details</Text>
 
-      {/* Proceed Button using TouchableOpacity */}
-      <TouchableOpacity
-        style={styles.proceedButton}
-        onPress={handleSaveInformation}
-      >
-        <Text style={styles.proceedButtonText}>Proceed</Text>
-      </TouchableOpacity>
-    </DismissKeyboardView>
+            <TextInput
+              placeholder="Name"
+              value={name}
+              onChangeText={setName}
+              onFocus={handleFocus}
+              onBlur={handleBlur}
+              style={[styles.input, nameError && styles.inputError]}
+            />
+
+            <TextInput
+              placeholder="Age"
+              value={age}
+              onChangeText={setAge}
+              keyboardType="numeric"
+              onFocus={handleFocus}
+              onBlur={handleBlur}
+              style={[styles.input, ageError && styles.inputError]}
+            />
+
+            <TextInput
+              placeholder="Phone Number"
+              value={phoneNumber}
+              onChangeText={setPhoneNumber}
+              keyboardType="phone-pad"
+              onFocus={handleFocus}
+              onBlur={handleBlur}
+              style={[styles.input, phoneError && styles.inputError]}
+            />
+
+            <Text style={styles.label}>Gender</Text>
+            <TouchableOpacity
+              style={styles.pickerTouchable}
+              onPress={() => setModalVisible(true)}
+            >
+              <Text style={styles.pickerText}>
+                {gender
+                  ? gender.charAt(0).toUpperCase() + gender.slice(1)
+                  : "Select gender"}
+              </Text>
+            </TouchableOpacity>
+
+            <Modal
+              transparent={true}
+              visible={modalVisible}
+              animationType="fade"
+              onRequestClose={() => setModalVisible(false)}
+            >
+              <TouchableOpacity
+                style={styles.modalOverlay}
+                activeOpacity={1}
+                onPressOut={() => setModalVisible(false)}
+              >
+                <View style={styles.modalContainer}>
+                  <FlatList
+                    data={genderData}
+                    renderItem={({ item }) => (
+                      <TouchableOpacity
+                        style={[
+                          styles.modalItem,
+                          {
+                            backgroundColor:
+                              gender === item.value ? "#E6E6FA" : "#fff",
+                          },
+                        ]}
+                        onPress={() => {
+                          setGender(item.value);
+                          setModalVisible(false);
+                        }}
+                      >
+                        <Text style={styles.modalItemText}>{item.label}</Text>
+                      </TouchableOpacity>
+                    )}
+                    keyExtractor={(item) => item.value}
+                  />
+                </View>
+              </TouchableOpacity>
+            </Modal>
+
+            {error && <Text style={styles.error}>{error}</Text>}
+
+            <TouchableOpacity
+              style={styles.proceedButton}
+              onPress={handleSaveInformation}
+            >
+              <Text style={styles.proceedButtonText}>Proceed</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: "center", padding: 20 },
-  title: { fontSize: 24, textAlign: "center", marginBottom: 20 },
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+  bannerContainer: {
+    height: screenHeight * 0.3,
+    width: "100%",
+    position: "absolute",
+    top: 10,
+    left: 0,
+    zIndex: -1,
+  },
+  bannerImage: {
+    width: "100%",
+    height: "100%",
+  },
+  formContainer: {
+    flex: 1,
+    padding: 20,
+    marginTop: screenHeight * 0.25,
+  },
+  title: {
+    top: 30,
+    fontSize: 24,
+    textAlign: "left",
+    marginBottom: 20,
+    fontWeight: "bold",
+    color: "#5F259F",
+  },
   input: {
+    top: 30,
     borderWidth: 1,
     padding: 12,
     marginBottom: 20,
     borderRadius: 8,
-    borderColor: "#ddd",
+    borderColor: "#ccc",
     fontSize: 16,
   },
+  inputError: {
+    borderColor: "red",
+  },
   label: {
+    top: 30,
     fontSize: 16,
     marginBottom: 10,
     color: "#333",
   },
-  pickerText: {
-    padding: 12,
-    backgroundColor: "#f9f9f9",
-    borderRadius: 8,
-    fontSize: 16,
-    textAlign: "center",
-  },
   pickerTouchable: {
+    top: 30,
     padding: 12,
     borderWidth: 1,
-    borderRadius: 8,
-    borderColor: "#ddd",
-    marginBottom: 20,
+    borderRadius: 5,
+    borderColor: "#ccc",
+    marginBottom: 15,
     backgroundColor: "#f9f9f9",
   },
+  pickerText: {
+    fontSize: 16,
+    color: "#333",
+  },
   error: {
+    top: 30,
     color: "red",
     textAlign: "center",
     marginBottom: 10,
     fontSize: 14,
   },
   proceedButton: {
-    marginTop: 20,
-    backgroundColor: "#1a73e8",
+    top: 30,
+    marginTop: 10,
+    backgroundColor: "#5F259F",
     borderRadius: 8,
     height: 50,
     justifyContent: "center",
@@ -229,35 +313,30 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
   },
-
-  // Modal Styles
   modalOverlay: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: "rgba(0, 0, 0, 0.2)",
   },
-  //   Pop-Up Config
   modalContainer: {
     width: 280,
     backgroundColor: "#fff",
     borderRadius: 10,
     padding: 12,
-    elevation: 9, // Shadow effect
+    elevation: 9,
   },
   modalItem: {
     paddingVertical: 15,
     paddingHorizontal: 20,
-    borderRadius: 0,
     marginVertical: 5,
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: "#E6E6FA",
+    borderRadius: 8,
   },
   modalItemText: {
     fontSize: 18,
     fontWeight: "500",
-  },
-  inputError: {
-    borderColor: "red",
   },
 });

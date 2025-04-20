@@ -4,7 +4,7 @@ import { View, Image, StyleSheet } from 'react-native';
 export default function SplashScreen({ navigation }: any) {
   useEffect(() => {
     const timer = setTimeout(() => {
-      navigation.replace('Home');
+      navigation.replace('LandingPage');
     }, 2000);
 
     return () => clearTimeout(timer); // cleanup

@@ -71,6 +71,5 @@ export async function setDocument(
   data: any,
   userId: string
 ) {
-  console.log("Setting document in collection:", userId);
   await setDoc(doc(db, collectionName, userId), data, { merge: true });
 }

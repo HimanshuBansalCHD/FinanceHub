@@ -2,7 +2,6 @@ import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import SmartAuthScreen from "../screens/SmartAuthScreen";
-import LoginScreen from "../screens/Login";
 import RegisterScreen from "../screens/RegisterationScreen";
 import HomeScreen from "../screens/Home";
 import PayScreen from "../screens/PayScreen";
@@ -28,7 +27,7 @@ const AppNavigator = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="SplashScreen">
-      <Stack.Screen
+        <Stack.Screen
           name="SplashScreen"
           component={SplashScreen}
           options={{ headerShown: false }}
@@ -36,11 +35,6 @@ const AppNavigator = () => {
         <Stack.Screen
           name="LandingPage"
           component={SmartAuthScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="Login"
-          component={LoginScreen}
           options={{ headerShown: false }}
         />
         <Stack.Screen

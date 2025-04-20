@@ -1,0 +1,4 @@
+TODO:
+
+1. Look at phone Number Payment
+2. AddLogin Screen ifexisitng user, ask for password.
